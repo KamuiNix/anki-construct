@@ -1,4 +1,83 @@
-.construct-sentence {
+html {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    font-size: 1.5rem;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+.nightMode .container {
+    height: 100%;
     display: flex;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nightMode .construct-sentence {
+    margin-top: 5rem;
+    display: flex;
+}
+
+.nightMode .construct-sentence span {
+    display: flex;
+    align-items: center;
+}
+
+.nightMode .guesses {
+    margin-left: 0.6rem;
+    margin-right: 0.6rem;
+    display: flex;
+}
+
+.nightMode .guesses > * {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+}
+
+.nightMode button {
+    padding: 0.4em 0.8em;
+    font-size: 0.7rem;
+    border-radius: 3px;
+    outline: none;
+    border: none;
+}
+
+.nightMode button:hover {
+    cursor: pointer;
+    opacity: 90%;
+    transition: opacity 10ms ease-in-out;
+}
+
+.nightMode ..word-btn {
+    color: #f4ebeb;
+    background-color: #ca4e4e !important;
+    font-size: 1rem;
+}
+
+.nightMode .bank {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+
+    display: flex;
+    justify-content: center;
+}
+
+.nightMode .bank > * {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.nightMode .control-btns {
+    margin-bottom: 0.5rem;
+}
+
+.nightMode .empty-word {
+    padding: 1rem 2rem;
+    background-color: #b5b3b3;
+    border-radius: 3px;
 }
