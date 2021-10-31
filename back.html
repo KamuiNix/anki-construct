@@ -1,0 +1,28 @@
+<main class="container">
+    <div class="cloze-area">
+        <div class="construct-sentence">
+            <span class="before">{{Before}}</span>
+            <div class="guesses"></div>
+            <span class="after">{{After}}</span>
+        </div>
+    </div>
+    <div class="analysis"></div>
+    <div id="testing"></div>
+</main>
+
+<script>
+    if (constructor.guessWords) {
+        for (let x = 0; x < bankSplitted.length; x++) {
+            const currGuess = constructor.guessWords[x];
+            const currBank = bankSplitted[x];
+            const element = document.createElement(
+                currGuess == EMPTY ? "div" : "button"
+            );
+            element.className = currGuess === EMPTY ? "empty-word" : "word-btn";
+            element.className +=
+                currGuess == currBank ? " correct " : " incorrect";
+            element.appendChild(document.createTextNode(currGuess));
+            appendElement(document.querySelector(".guesses"), element);
+        }
+    }
+</script>

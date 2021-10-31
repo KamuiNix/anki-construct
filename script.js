@@ -146,6 +146,10 @@ const setupPopPushEvents = (buttons) => {
                 constructor.insert(word);
                 appendElement(guessDiv, btn);
             }
+            if (Persistence.isAvailable()) {
+                item = constructor.solution();
+                Persistence.setItem(item);
+            }
             paintGuesses();
         };
     });

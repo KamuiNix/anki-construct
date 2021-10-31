@@ -20,6 +20,7 @@ html {
 .nightMode .construct-sentence {
     margin-top: 5rem;
     display: flex;
+    font-family: DFKyoKaSho Pro-6N;
 }
 
 .nightMode .construct-sentence span {
@@ -36,15 +37,16 @@ html {
 .nightMode .guesses > * {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
-    font-size: 1rem;
+    font-size: 1.25rem;
 }
 
 .nightMode button {
     padding: 0.4em 0.8em;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     border-radius: 3px;
     outline: none;
     border: none;
+    font-family: DFKyoKaSho Pro-6N;
 }
 
 .nightMode button:hover {
@@ -53,16 +55,15 @@ html {
     transition: opacity 10ms ease-in-out;
 }
 
-.nightMode ..word-btn {
+.nightMode .word-btn {
     color: #f4ebeb;
     background-color: #ca4e4e !important;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .nightMode .bank {
     margin-top: 2rem;
     margin-bottom: 1rem;
-
     display: flex;
     justify-content: center;
 }
@@ -80,4 +81,12 @@ html {
     padding: 1rem 2rem;
     background-color: #b5b3b3;
     border-radius: 3px;
+}
+
+.nightMode .incorrect {
+    border: 3px solid #ca4e4e;
+}
+
+.nightMode .correct {
+    border: 3px solid #6bd83c;
 }
