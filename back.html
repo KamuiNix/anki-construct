@@ -1,3 +1,90 @@
+<script>
+    if (void 0 === window.Persistence) {
+        var _persistenceKey = "github.com/SimonLammer/anki-persistence/",
+            _defaultKey = "_default";
+        if (
+            ((window.Persistence_sessionStorage = function () {
+                var e = !1;
+                try {
+                    "object" == typeof window.sessionStorage &&
+                        ((e = !0),
+                        (this.clear = function () {
+                            for (var e = 0; e < sessionStorage.length; e++) {
+                                var t = sessionStorage.key(e);
+                                0 == t.indexOf(_persistenceKey) &&
+                                    (sessionStorage.removeItem(t), e--);
+                            }
+                        }),
+                        (this.setItem = function (e, t) {
+                            null == t && ((t = e), (e = _defaultKey)),
+                                sessionStorage.setItem(
+                                    _persistenceKey + e,
+                                    JSON.stringify(t)
+                                );
+                        }),
+                        (this.getItem = function (e) {
+                            return (
+                                null == e && (e = _defaultKey),
+                                JSON.parse(
+                                    sessionStorage.getItem(_persistenceKey + e)
+                                )
+                            );
+                        }),
+                        (this.removeItem = function (e) {
+                            null == e && (e = _defaultKey),
+                                sessionStorage.removeItem(_persistenceKey + e);
+                        }));
+                } catch (e) {}
+                this.isAvailable = function () {
+                    return e;
+                };
+            }),
+            (window.Persistence_windowKey = function (e) {
+                var t = window[e],
+                    n = !1;
+                "object" == typeof t &&
+                    ((n = !0),
+                    (this.clear = function () {
+                        t[_persistenceKey] = {};
+                    }),
+                    (this.setItem = function (e, n) {
+                        null == n && ((n = e), (e = _defaultKey)),
+                            (t[_persistenceKey][e] = n);
+                    }),
+                    (this.getItem = function (e) {
+                        return (
+                            null == e && (e = _defaultKey),
+                            null == t[_persistenceKey][e]
+                                ? null
+                                : t[_persistenceKey][e]
+                        );
+                    }),
+                    (this.removeItem = function (e) {
+                        null == e && (e = _defaultKey),
+                            delete t[_persistenceKey][e];
+                    }),
+                    null == t[_persistenceKey] && this.clear()),
+                    (this.isAvailable = function () {
+                        return n;
+                    });
+            }),
+            (window.Persistence = new Persistence_sessionStorage()),
+            Persistence.isAvailable() ||
+                (window.Persistence = new Persistence_windowKey("py")),
+            !Persistence.isAvailable())
+        ) {
+            var titleStartIndex = window.location.toString().indexOf("title"),
+                titleContentIndex = window.location
+                    .toString()
+                    .indexOf("main", titleStartIndex);
+            titleStartIndex > 0 &&
+                titleContentIndex > 0 &&
+                titleContentIndex - titleStartIndex < 10 &&
+                (window.Persistence = new Persistence_windowKey("qt"));
+        }
+    }
+</script>
+
 <main class="container">
     <div class="cloze-area">
         <div class="construct-sentence">
@@ -11,18 +98,156 @@
 </main>
 
 <script>
-    if (constructor.guessWords) {
-        for (let x = 0; x < bankSplitted.length; x++) {
-            const currGuess = constructor.guessWords[x];
-            const currBank = bankSplitted[x];
-            const element = document.createElement(
-                currGuess == EMPTY ? "div" : "button"
+    (function () {
+        if (Persistence.isAvailable()) {
+            const EMPTY = "";
+            const beforeSpan = document.querySelector(".before");
+            const guessDiv = document.querySelector(".guesses");
+            const afterSpan = document.querySelector(".after");
+            const analysisDiv = document.querySelector(".analysis");
+            function sentenceToWords(splitSentence) {
+                return splitSentence.split(/\s+/);
+            }
+            const bankUnsplitted = "{{Options}}";
+            const bankSplitted = bankUnsplitted.split(" ");
+            const guessWords = Persistence.getItem();
+            console.log(guessWords);
+            Persistence.clear();
+            const before = "{{Before}}";
+            const after = "{{After}}";
+
+            class Constructor {
+                constructor(before, after, bank, correctSentence) {
+                    this.before = before;
+                    this.after = after;
+                    this.bank = bank;
+                    this.correctSentence = correctSentence;
+                    this.maxLen = this.bank.length;
+                    // Uses empty string for blanks
+                    this.guessWords = Array(this.maxLen).fill(EMPTY);
+                }
+
+                shuffle() {
+                    shuffle(this.bank);
+                }
+
+                findGuess(query) {
+                    return this.guessWords.findIndex((word) => word === query);
+                }
+
+                findBank(query) {
+                    return this.bank.findIndex((word) => word === query);
+                }
+
+                removeFromBank(word) {
+                    const indx = this.findBank(word);
+                    this.bank[indx] = EMPTY;
+                }
+
+                addToBank(word) {
+                    const emptySpot = this.bank.findIndex(
+                        (word) => word === EMPTY
+                    );
+                    this.bank[emptySpot] = word;
+                }
+
+                // Inserts a guess at the leftmost empty spot
+                insert(word) {
+                    const insIndex = this.guessWords.findIndex(
+                        (word) => word === EMPTY
+                    );
+                    this.guessWords[insIndex] = word;
+                    this.removeFromBank(word);
+                }
+
+                // Removes guess at given position and moves empty guesses to the end
+                remove(word) {
+                    this.addToBank(word);
+                    const index = this.findGuess(word);
+                    if (index < 0) {
+                        return;
+                    }
+                    this.guessWords[index] = EMPTY;
+                    for (let x = 0; x < this.guessWords.length; x++) {
+                        const curr = this.guessWords[x];
+                        if (curr == EMPTY) {
+                            this.guessWords.push(
+                                this.guessWords.splice(x, 1)[0]
+                            );
+                        }
+                    }
+                }
+
+                // Returns false for incorrect, true for correct
+                check() {
+                    const guess =
+                        this.before +
+                        this.guessWords
+                            .filter((word) => word !== EMPTY)
+                            .join("") +
+                        this.after;
+                    return this.correctSentence === guess;
+                }
+
+                // Clears guesses
+                reset() {
+                    // Place back the guesses into the bank
+                    this.guessWords.forEach((word) => {
+                        if (word !== EMPTY) {
+                            this.addToBank(word);
+                        }
+                    });
+                    this.guessWords = Array(this.maxLen).fill(EMPTY);
+                }
+            }
+            const constructor = new Constructor(
+                before,
+                after,
+                [...bankSplitted],
+                [before, ...bankSplitted, after].join("")
             );
-            element.className = currGuess === EMPTY ? "empty-word" : "word-btn";
-            element.className +=
-                currGuess == currBank ? " correct " : " incorrect";
-            element.appendChild(document.createTextNode(currGuess));
-            appendElement(document.querySelector(".guesses"), element);
+            constructor.guessWords = guessWords;
+            const appendElement = (parent, elm) => {
+                if (parent.lastChild) {
+                    parent.lastChild.after(elm);
+                } else {
+                    parent.appendChild(elm);
+                }
+            };
+
+            const paintGuesses = () => {
+                guessDiv.innerHTML = "";
+                constructor.guessWords.forEach((word) => {
+                    const element = document.createElement(
+                        word == EMPTY ? "div" : "button"
+                    );
+                    element.className =
+                        word === EMPTY ? "empty-word" : "word-btn";
+                    element.appendChild(document.createTextNode(word));
+                    guessDiv.append(element);
+                });
+                const guessBtns = guessDiv.querySelectorAll(".word-btn");
+            };
+
+            const outputModel = (model) => {
+                paintGuesses();
+            };
+
+            if (guessWords && guessDiv.innerHTML === "") {
+                for (let x = 0; x < bankSplitted.length; x++) {
+                    const currGuess = guessWords[x];
+                    const currBank = bankSplitted[x];
+                    const element = document.createElement(
+                        currGuess == EMPTY ? "div" : "button"
+                    );
+                    element.className =
+                        currGuess === EMPTY ? "empty-word" : "word-btn-back";
+                    element.className +=
+                        currGuess == currBank ? " correct " : " incorrect";
+                    element.appendChild(document.createTextNode(currGuess));
+                    appendElement(document.querySelector(".guesses"), element);
+                }
+            }
         }
-    }
+    })();
 </script>

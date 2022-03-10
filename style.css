@@ -57,7 +57,12 @@ html {
 
 .nightMode .word-btn {
     color: #f4ebeb;
+    font-size: 0.8rem;
     background-color: #ca4e4e !important;
+}
+
+.nightMode .word-btn-back {
+    color: #f4ebeb;
     font-size: 0.8rem;
 }
 
