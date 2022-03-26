@@ -88,9 +88,9 @@
 <main class="container">
     <div class="cloze-area">
         <div class="construct-sentence">
-            <span class="before">{{Before}}</span>
+            <span class="before"></span>
             <div class="guesses"></div>
-            <span class="after">{{After}}</span>
+            <span class="after"></span>
         </div>
         <div class="bank"></div>
     </div>
@@ -118,15 +118,25 @@
         const analysisDiv = document.querySelector(".analysis");
         const resetBtn = document.querySelector(".reset");
 
+        const context = "{{Context}}";
+        const contextSplit = context.split("_");
+        const bankUnsplitted = "{{Options}}";
+        const bankSplitted = bankUnsplitted.split(" ");
+
         class Constructor {
-            constructor(before, after, bank, correctSentence) {
-                this.before = before;
-                this.after = after;
+            constructor(bank, correctSentence) {
                 this.bank = bank;
                 this.correctSentence = correctSentence;
-                this.maxLen = this.bank.length;
+                this.maxLen = (context.match(/_/g) || []).length;
                 // Uses empty string for blanks
                 this.guessWords = Array(this.maxLen).fill(EMPTY);
+            }
+
+            isFull() {
+                return (
+                    this.guessWords.filter((word) => word !== EMPTY).length ===
+                    this.maxLen
+                );
             }
 
             shuffle() {
@@ -197,14 +207,7 @@
             }
         }
 
-        const before = "{{Before}}";
-        const after = "{{After}}";
-        const bankUnsplitted = "{{Options}}";
-        const bankSplitted = bankUnsplitted.split(" ");
-
         const constructor = new Constructor(
-            before,
-            after,
             [...bankSplitted],
             [before, ...bankSplitted, after].join("")
         );
@@ -250,7 +253,7 @@
                         // Pop the element
                         constructor.remove(word);
                         appendElement(bankDiv, btn);
-                    } else {
+                    } else if (!constructor.isFull()) {
                         // Add to guesses
                         constructor.insert(word);
                         appendElement(guessDiv, btn);

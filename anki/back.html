@@ -88,9 +88,9 @@
 <main class="container">
     <div class="cloze-area">
         <div class="construct-sentence">
-            <span class="before">{{Before}}</span>
+            <span class="before"></span>
             <div class="guesses"></div>
-            <span class="after">{{After}}</span>
+            <span class="after"></span>
         </div>
     </div>
     <div class="analysis"></div>
@@ -101,20 +101,21 @@
     (function () {
         if (Persistence.isAvailable()) {
             const EMPTY = "";
+            const bankDiv = document.querySelector(".bank");
             const beforeSpan = document.querySelector(".before");
             const guessDiv = document.querySelector(".guesses");
             const afterSpan = document.querySelector(".after");
             const analysisDiv = document.querySelector(".analysis");
-            function sentenceToWords(splitSentence) {
-                return splitSentence.split(/\s+/);
-            }
+            const resetBtn = document.querySelector(".reset");
+            const guessWords = Persistence.getItem();
+            Persistence.clear();
+
+            const context = "{{Context}}";
+            const contextSplit = context.split("_");
+            const before = contextSplit[0];
+            const after = contextSplit[contextSplit.length - 1];
             const bankUnsplitted = "{{Options}}";
             const bankSplitted = bankUnsplitted.split(" ");
-            const guessWords = Persistence.getItem();
-            console.log(guessWords);
-            Persistence.clear();
-            const before = "{{Before}}";
-            const after = "{{After}}";
 
             class Constructor {
                 constructor(before, after, bank, correctSentence) {
@@ -122,11 +123,10 @@
                     this.after = after;
                     this.bank = bank;
                     this.correctSentence = correctSentence;
-                    this.maxLen = this.bank.length;
+                    this.maxLen = (context.match(/_/g) || []).length;
                     // Uses empty string for blanks
                     this.guessWords = Array(this.maxLen).fill(EMPTY);
                 }
-
                 shuffle() {
                     shuffle(this.bank);
                 }
@@ -233,19 +233,29 @@
                 paintGuesses();
             };
 
-            if (guessWords && guessDiv.innerHTML === "") {
+            console.log(constructor.guessWords);
+            beforeSpan.innerHTML = before;
+            afterSpan.innerHTML = after;
+            if (constructor.guessWords && guessDiv.innerHTML === "") {
                 for (let x = 0; x < bankSplitted.length; x++) {
-                    const currGuess = guessWords[x];
-                    const currBank = bankSplitted[x];
-                    const element = document.createElement(
-                        currGuess == EMPTY ? "div" : "button"
-                    );
-                    element.className =
-                        currGuess === EMPTY ? "empty-word" : "word-btn-back";
-                    element.className +=
-                        currGuess == currBank ? " correct " : " incorrect";
-                    element.appendChild(document.createTextNode(currGuess));
-                    appendElement(document.querySelector(".guesses"), element);
+                    const currGuess = constructor.guessWords[x];
+                    if (currGuess !== undefined) {
+                        const currBank = bankSplitted[x];
+                        const element = document.createElement(
+                            currGuess == EMPTY ? "div" : "button"
+                        );
+                        element.className =
+                            currGuess === EMPTY
+                                ? "empty-word"
+                                : "word-btn-back";
+                        element.className +=
+                            currGuess == currBank ? " correct " : " incorrect";
+                        element.appendChild(document.createTextNode(currGuess));
+                        appendElement(
+                            document.querySelector(".guesses"),
+                            element
+                        );
+                    }
                 }
             }
         }
