@@ -13,15 +13,15 @@ const guessDiv = document.querySelector(".guesses");
 const analysisDiv = document.querySelector(".analysis");
 const resetBtn = document.querySelector(".reset");
 
-const context = "あのデパートは、毎日＿１０時＿開店する";
-const bankUnsplitted = "に X に X";
+const context = "明日、銀行に行く予定が2＿";
+const bankUnsplitted = "ある から いる くる する";
 const bankSplitted = bankUnsplitted.split(" ");
 
 class Constructor {
     constructor(bank, correctSentence) {
         this.bank = bank;
         this.correctSentence = correctSentence;
-        this.maxLen = (context.match(/＿/g) || []).length;
+        this.maxLen = parseInt(context.match(/(\d)＿/)[1]);
         // Uses empty string for blanks
         this.guessWords = Array(this.maxLen).fill(EMPTY);
     }
@@ -78,19 +78,6 @@ class Constructor {
         }
     }
 
-    // Returns false for incorrect, true for correct
-    check() {
-        let underscore = 0;
-        let contextSplit = context.split(/(?=＿)|(?<=＿)/g);
-        for (let i = 0; i < contextSplit.length; i++) {
-            if (contextSplit[i] === "＿") {
-                contextSplit[i] = this.guessWords[underscore];
-                underscore++;
-            }
-        }
-        return this.correctSentence === contextSplit.join("");
-    }
-
     // Clears guesses
     reset() {
         // Place back the guesses into the bank
@@ -103,10 +90,7 @@ class Constructor {
     }
 }
 
-const constructor = new Constructor(
-    [...bankSplitted],
-    "あのデパートは、毎日X１０時に開店する"
-);
+const constructor = new Constructor([...bankSplitted]);
 
 const appendElement = (parent, elm) => {
     if (parent.lastChild) {
@@ -119,15 +103,17 @@ const appendElement = (parent, elm) => {
 const paintGuesses = () => {
     guessDiv.innerHTML = "";
     let underscore = 0;
-    const contextSplit = context.split(/(?=＿)|(?<=＿)/g);
+    const idx_num = context.match(/(\d)＿/).index;
+    const newContext =
+        context.slice(0, idx_num) + context.slice(idx_num + 1, context.length);
+    const contextSplit = newContext.split(/(?=＿)|(?<=＿)/g);
     for (let i = 0; i < contextSplit.length; i++) {
         if (contextSplit[i] === "＿") {
             const word = constructor.guessWords[underscore];
             const element = document.createElement(
                 word == EMPTY ? "div" : "button"
             );
-            element.className = word === EMPTY ? "empty-word" : "word-btn";
-            element.appendChild(document.createTextNode(word));
+            element.className = "empty-word";
             guessDiv.append(element);
             underscore++;
         } else {
@@ -156,17 +142,16 @@ const setupPopPushEvents = (buttons) => {
         btn.onclick = (ev) => {
             // Persistence.setItem(constructor.guessWords);
             const word = ev.target.textContent;
-            if (ev.target.parentNode.className === "guesses") {
+            if (ev.target.classList.contains("outline")) {
                 // Pop the element
                 constructor.remove(word);
-                appendElement(bankDiv, btn);
+                btn.classList.remove("outline");
             } else if (!constructor.isFull()) {
                 // Add to guesses
                 constructor.insert(word);
-                appendElement(guessDiv, btn);
+                btn.classList.add("outline");
             }
             paintGuesses();
-            console.log(constructor.guessWords);
         };
     });
 };
@@ -189,7 +174,6 @@ resetBtn.onclick = (ev) => {
         appendElement(bankDiv, btn);
     });
     constructor.shuffle();
-    analysisDiv.innerHTML = "";
     outputModel(constructor);
 };
 
