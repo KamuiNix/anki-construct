@@ -1,26 +1,16 @@
 const EMPTY = "";
 
-function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-}
-
-function sentenceToWords(splitSentence) {
-    return splitSentence.split(/\s+/);
-}
-
 const bankDiv = document.querySelector(".bank");
 const guessDiv = document.querySelector(".guesses");
 const analysisDiv = document.querySelector(".analysis");
 const resetBtn = document.querySelector(".reset");
 
 const context = "明日、銀行に行く予定が2＿";
-const bankUnsplitted = "ある から いる くる する";
-const bankSplitted = bankUnsplitted.split(" ");
+const bank = "ある から いる くる する".split(" ");
 
 class Constructor {
-    constructor(bank, correctSentence) {
+    constructor(bank) {
         this.bank = bank;
-        this.correctSentence = correctSentence;
         this.maxLen = parseInt(context.match(/(\d)＿/)[1]);
         // Uses empty string for blanks
         this.guessWords = Array(this.maxLen).fill(EMPTY);
@@ -34,15 +24,23 @@ class Constructor {
     }
 
     shuffle() {
-        shuffle(this.bank);
+        this.bank.sort(() => Math.random() - 0.5);
+    }
+
+    findWord(list, query) {
+        return list.findIndex((word) => word === query);
+    }
+
+    findEmpty(list) {
+        return this.findWord(list, EMPTY);
     }
 
     findGuess(query) {
-        return this.guessWords.findIndex((word) => word === query);
+        return this.findWord(this.guessWords, query);
     }
 
     findBank(query) {
-        return this.bank.findIndex((word) => word === query);
+        return this.findWord(this.bank, query);
     }
 
     removeFromBank(word) {
@@ -51,13 +49,13 @@ class Constructor {
     }
 
     addToBank(word) {
-        const emptySpot = this.bank.findIndex((word) => word === EMPTY);
+        const emptySpot = this.findEmpty(this.bank);
         this.bank[emptySpot] = word;
     }
 
     // Inserts a guess at the leftmost empty spot
     insert(word) {
-        const insIndex = this.guessWords.findIndex((word) => word === EMPTY);
+        const insIndex = this.findEmpty(this.guessWords);
         this.guessWords[insIndex] = word;
         this.removeFromBank(word);
     }
@@ -72,7 +70,7 @@ class Constructor {
         this.guessWords[index] = EMPTY;
         for (let x = 0; x < this.guessWords.length; x++) {
             const curr = this.guessWords[x];
-            if (curr == EMPTY) {
+            if (curr === EMPTY) {
                 this.guessWords.push(this.guessWords.splice(x, 1)[0]);
             }
         }
@@ -90,7 +88,7 @@ class Constructor {
     }
 }
 
-const constructor = new Constructor([...bankSplitted]);
+const constructor = new Constructor([...bank]);
 
 const appendElement = (parent, elm) => {
     if (parent.lastChild) {
@@ -152,6 +150,7 @@ const setupPopPushEvents = (buttons) => {
                 btn.classList.add("outline");
             }
             paintGuesses();
+            console.log(constructor.guessWords);
         };
     });
 };
@@ -161,21 +160,23 @@ const setupEvents = () => {
     setupPopPushEvents(btns);
 };
 
-const outputModel = (model) => {
+const outputModel = () => {
     paintGuesses();
     paintBank();
     setupEvents();
 };
 
-resetBtn.onclick = (ev) => {
+resetBtn.onclick = () => {
     constructor.reset();
+
     const guessBtns = guessDiv.querySelectorAll("button");
     guessBtns.forEach((btn) => {
         appendElement(bankDiv, btn);
     });
+
     constructor.shuffle();
     outputModel(constructor);
 };
 
 constructor.shuffle();
-outputModel(constructor);
+outputModel();

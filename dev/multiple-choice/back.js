@@ -1,14 +1,6 @@
 // if (Persistence.isAvailable()) {
 const EMPTY = "";
 
-function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-}
-
-function sentenceToWords(splitSentence) {
-    return splitSentence.split(/\s+/);
-}
-
 const guessDiv = document.querySelector(".guesses");
 const bankDiv = document.querySelector(".bank");
 /* const guessWords = Persistence.getItem();
@@ -16,8 +8,7 @@ const bankDiv = document.querySelector(".bank");
 const guessWords = ["ある", "いる"];
 
 const context = "明日、銀行に行く予定が2＿";
-const bankUnsplitted = "ある から いる くる する";
-const bankSplitted = bankUnsplitted.split(" ");
+const bank = "ある から いる くる する".split(" ");
 
 class Constructor {
     constructor(bank) {
@@ -35,15 +26,23 @@ class Constructor {
     }
 
     shuffle() {
-        shuffle(this.bank);
+        this.bank.sort(() => Math.random() - 0.5);
+    }
+
+    findWord(list, query) {
+        return list.findIndex((word) => word === query);
+    }
+
+    findEmpty(list) {
+        return this.findWord(list, EMPTY);
     }
 
     findGuess(query) {
-        return this.guessWords.findIndex((word) => word === query);
+        return this.findWord(this.guessWords, query);
     }
 
     findBank(query) {
-        return this.bank.findIndex((word) => word === query);
+        return this.findWord(this.bank, query);
     }
 
     removeFromBank(word) {
@@ -52,13 +51,13 @@ class Constructor {
     }
 
     addToBank(word) {
-        const emptySpot = this.bank.findIndex((word) => word === EMPTY);
+        const emptySpot = this.findEmpty(this.bank);
         this.bank[emptySpot] = word;
     }
 
     // Inserts a guess at the leftmost empty spot
     insert(word) {
-        const insIndex = this.guessWords.findIndex((word) => word === EMPTY);
+        const insIndex = this.findEmpty(this.guessWords);
         this.guessWords[insIndex] = word;
         this.removeFromBank(word);
     }
@@ -73,7 +72,7 @@ class Constructor {
         this.guessWords[index] = EMPTY;
         for (let x = 0; x < this.guessWords.length; x++) {
             const curr = this.guessWords[x];
-            if (curr == EMPTY) {
+            if (curr === EMPTY) {
                 this.guessWords.push(this.guessWords.splice(x, 1)[0]);
             }
         }
@@ -91,7 +90,7 @@ class Constructor {
     }
 }
 
-const constructor = new Constructor([...bankSplitted]);
+const constructor = new Constructor([...bank]);
 constructor.guessWords = guessWords;
 
 const appendElement = (parent, elm) => {
@@ -103,7 +102,6 @@ const appendElement = (parent, elm) => {
 };
 
 if (constructor.guessWords && guessDiv.innerHTML === "") {
-    let underscore = 0;
     const idx_num = context.match(/(\d)＿/).index;
     const newContext =
         context.slice(0, idx_num) + context.slice(idx_num + 1, context.length);
@@ -111,11 +109,8 @@ if (constructor.guessWords && guessDiv.innerHTML === "") {
     for (let i = 0; i < contextSplit.length; i++) {
         if (contextSplit[i] === "＿") {
             const element = document.createElement("div");
-            // element.className = word === EMPTY ? "empty-word" : "word-btn";
             element.className = "empty-word";
-            // element.appendChild(document.createTextNode(word));
             appendElement(document.querySelector(".guesses"), element);
-            underscore++;
         } else {
             const word = contextSplit[i];
             const element = document.createElement("span");
@@ -124,13 +119,23 @@ if (constructor.guessWords && guessDiv.innerHTML === "") {
         }
     }
 
-    constructor.bank.forEach((word, index) => {
+    constructor.guessWords.sort();
+    const rightAnswers = bank.slice(0, constructor.maxLen).sort();
+    rightAnswers.forEach((word, index) => {
         const cword = constructor.guessWords[index];
         const element = document.createElement("button");
         element.className = "word-btn";
         element.className += word == cword ? " correct " : " incorrect";
-        element.appendChild(document.createTextNode(word));
+        element.appendChild(document.createTextNode(cword));
         appendElement(bankDiv, element);
+
+        // render correct option too
+        if (element.className.includes("incorrect")) {
+            const celement = document.createElement("button");
+            celement.className = "word-btn missed";
+            celement.appendChild(document.createTextNode(word));
+            appendElement(bankDiv, celement);
+        }
     });
 }
 // }
