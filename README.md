@@ -77,6 +77,25 @@ Options: ある から いる くる する
 In this case, 2 answers must be selected, so there is a 2 right befoer the underscore.
 In the options, ある and から are the two right answers, so they come first in the options. The order does not matter as long as they come before the wrong answers.
 
+## Source code architecture
+
+Developing javascript-heavy note types for Anki requires a different approach than developing a traditional website.
+Since Anki only offers a small pane with a plain notepad-like editor to quickly edit the HTML, CSS, and JS, it is unsuitable for developing larger scale note types.
+
+For this reason, this repository contains an `anki/` and `dev/` directory. `anki/` is intended to hold the final production code for the note type, with small modifications such as Persistence.
+`dev/` contains multple sub-directories for each card and those directories contain the browser-version of the code.
+
+By developing the note type like a regular website, the process is much more streamlined and efficient because of access to debuggers, devtools, a proper editor, and more.
+After a period of development, testing, refactoring, and documentation, `dev/` is then ported back into anki, where `anki/` will be consequently updated.
+
+### Persistence
+
+The only dependency for the project is [Persistence](https://github.com/SimonLammer/anki-persistence), which is a small javascript library for passing data from the front to the back. Struct uses this to save the guesses inputted by the user, so the back portion of the card can grade and visually indicate the correct and missed answer choices.
+
+### Constructor
+This is a class the note type is dependant upon because it serves as the model and controller for the view (HTML interface). For each card type, the constructor is modified as necessary.
+Supported operations include adding to bank, removal, queries, reset, and more.
+
 ## License
 
 [GPL v3.0](https://choosealicense.com/licenses/gpl-3.0/)
