@@ -1,1 +1,126 @@
-../style.css
+html {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    font-size: 1.5rem;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.construct-sentence {
+    margin-top: 5rem;
+    display: flex;
+    font-family: DFKyoKaSho Pro-6N;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.construct-sentence span {
+    display: flex;
+    align-items: center;
+}
+
+.guesses {
+    margin-left: 0.6rem;
+    margin-right: 0.6rem;
+    gap: 0.6rem;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.guesses {
+    justify-content: center;
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.bank {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+}
+
+.guesses > * {
+    font-size: 1.25rem;
+}
+
+button {
+    padding: 0.4em 0.8em;
+    font-size: 0.8rem;
+    border-radius: 3px;
+    outline: none;
+    border: none;
+    font-family: DFKyoKaSho Pro-6N;
+}
+
+button:hover {
+    cursor: pointer;
+    opacity: 90%;
+    transition: opacity 10ms ease-in-out;
+}
+
+.word-btn {
+    color: #f4ebeb;
+    font-size: 0.8rem;
+    background-color: #2a2b2a !important;
+}
+
+.word-btn-back {
+    color: #f4ebeb;
+    font-size: 0.8rem;
+}
+
+.bank {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.bank > * {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.control-btns {
+    margin-bottom: 0.5rem;
+}
+
+.empty-word {
+    padding: 1rem 2rem;
+    background-color: #b5b3b3;
+    border-radius: 3px;
+}
+
+.incorrect {
+    border: 3px solid #ca4e4e;
+}
+
+.correct {
+    border: 3px solid #6bd83c;
+}
+
+.missed {
+    border: 3px solid #6369ed;
+}
+
+.outline {
+    border: 5px solid #68c3ed;
+}
+
+@media only screen and (max-width: 800px) {
+    .construct-sentence {
+        justify-content: center;
+    }
+}

@@ -1,27 +1,17 @@
 // if (Persistence.isAvailable()) {
 const EMPTY = "";
 
-function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-}
-
-function sentenceToWords(splitSentence) {
-    return splitSentence.split(/\s+/);
-}
-
 const guessDiv = document.querySelector(".guesses");
 /* const guessWords = Persistence.getItem();
     Persistence.clear(); */
 const guessWords = ["は", "", "の"];
 
 const context = "あのデパート＿、毎日＿１０時＿開店する";
-const bankUnsplitted = "は へ が\n*は に\nへ の は";
-const bankSplitted = bankUnsplitted.split("\n");
+const bank = "は へ が\n*は に\nへ の は".split("\n");
 
 class Constructor {
-    constructor(bank, correctSentence) {
+    constructor(bank) {
         this.bank = bank;
-        this.correctSentence = correctSentence;
         this.maxLen = (context.match(/＿/g) || []).length;
         // Uses empty string for blanks
         this.guessWords = Array(this.maxLen).fill(EMPTY);
@@ -35,15 +25,23 @@ class Constructor {
     }
 
     shuffle() {
-        shuffle(this.bank);
+        this.bank.sort(() => Math.random() - 0.5);
+    }
+
+    findWord(list, query) {
+        return list.findIndex((word) => word === query);
+    }
+
+    findEmpty(list) {
+        return this.findWord(list, EMPTY);
     }
 
     findGuess(query) {
-        return this.guessWords.findIndex((word) => word === query);
+        return this.findWord(this.guessWords, query);
     }
 
     findBank(query) {
-        return this.bank.findIndex((word) => word === query);
+        return this.findWord(this.bank, query);
     }
 
     removeFromBank(word) {
@@ -52,13 +50,13 @@ class Constructor {
     }
 
     addToBank(word) {
-        const emptySpot = this.bank.findIndex((word) => word === EMPTY);
+        const emptySpot = this.findEmpty(this.bank);
         this.bank[emptySpot] = word;
     }
 
     // Inserts a guess at the leftmost empty spot
     insert(word) {
-        const insIndex = this.guessWords.findIndex((word) => word === EMPTY);
+        const insIndex = this.findEmpty(this.guessWords);
         this.guessWords[insIndex] = word;
         this.removeFromBank(word);
     }
@@ -73,14 +71,25 @@ class Constructor {
         this.guessWords[index] = EMPTY;
         for (let x = 0; x < this.guessWords.length; x++) {
             const curr = this.guessWords[x];
-            if (curr == EMPTY) {
+            if (curr === EMPTY) {
                 this.guessWords.push(this.guessWords.splice(x, 1)[0]);
             }
         }
     }
+
+    // Clears guesses
+    reset() {
+        // Place back the guesses into the bank
+        this.guessWords.forEach((word) => {
+            if (word !== EMPTY) {
+                this.addToBank(word);
+            }
+        });
+        this.guessWords = Array(this.maxLen).fill(EMPTY);
+    }
 }
 
-const constructor = new Constructor([...bankSplitted]);
+const constructor = new Constructor([...bank]);
 constructor.guessWords = guessWords;
 
 const appendElement = (parent, elm) => {
@@ -97,7 +106,7 @@ if (constructor.guessWords && guessDiv.innerHTML === "") {
     for (let i = 0; i < contextSplit.length; i++) {
         if (contextSplit[i] === "＿") {
             const word = constructor.guessWords[underscore];
-            let correct = bankSplitted[underscore].split(" ")[0];
+            let correct = bank[underscore].split(" ")[0];
             if (correct[0] === "*") {
                 correct = "";
             }
