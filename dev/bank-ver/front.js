@@ -1,26 +1,15 @@
 const EMPTY = "";
 
-function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-}
-
-function sentenceToWords(splitSentence) {
-    return splitSentence.split(/\s+/);
-}
-
 const bankDiv = document.querySelector(".bank");
 const guessDiv = document.querySelector(".guesses");
-const analysisDiv = document.querySelector(".analysis");
 const resetBtn = document.querySelector(".reset");
 
 const context = "あのデパートは、毎日＿１０時＿開店する";
-const bankUnsplitted = "に X に X";
-const bankSplitted = bankUnsplitted.split(" ");
+const bank = "に X に X".split(" ");
 
 class Constructor {
-    constructor(bank, correctSentence) {
+    constructor(bank) {
         this.bank = bank;
-        this.correctSentence = correctSentence;
         this.maxLen = (context.match(/＿/g) || []).length;
         // Uses empty string for blanks
         this.guessWords = Array(this.maxLen).fill(EMPTY);
@@ -34,15 +23,23 @@ class Constructor {
     }
 
     shuffle() {
-        shuffle(this.bank);
+        this.bank.sort(() => Math.random() - 0.5);
+    }
+
+    findWord(list, query) {
+        return list.findIndex((word) => word === query);
+    }
+
+    findEmpty(list) {
+        return this.findWord(list, EMPTY);
     }
 
     findGuess(query) {
-        return this.guessWords.findIndex((word) => word === query);
+        return this.findWord(this.guessWords, query);
     }
 
     findBank(query) {
-        return this.bank.findIndex((word) => word === query);
+        return this.findWord(this.bank, query);
     }
 
     removeFromBank(word) {
@@ -51,13 +48,13 @@ class Constructor {
     }
 
     addToBank(word) {
-        const emptySpot = this.bank.findIndex((word) => word === EMPTY);
+        const emptySpot = this.findEmpty(this.bank);
         this.bank[emptySpot] = word;
     }
 
     // Inserts a guess at the leftmost empty spot
     insert(word) {
-        const insIndex = this.guessWords.findIndex((word) => word === EMPTY);
+        const insIndex = this.findEmpty(this.guessWords);
         this.guessWords[insIndex] = word;
         this.removeFromBank(word);
     }
@@ -72,23 +69,10 @@ class Constructor {
         this.guessWords[index] = EMPTY;
         for (let x = 0; x < this.guessWords.length; x++) {
             const curr = this.guessWords[x];
-            if (curr == EMPTY) {
+            if (curr === EMPTY) {
                 this.guessWords.push(this.guessWords.splice(x, 1)[0]);
             }
         }
-    }
-
-    // Returns false for incorrect, true for correct
-    check() {
-        let underscore = 0;
-        let contextSplit = context.split(/(?=＿)|(?<=＿)/g);
-        for (let i = 0; i < contextSplit.length; i++) {
-            if (contextSplit[i] === "＿") {
-                contextSplit[i] = this.guessWords[underscore];
-                underscore++;
-            }
-        }
-        return this.correctSentence === contextSplit.join("");
     }
 
     // Clears guesses
@@ -103,10 +87,7 @@ class Constructor {
     }
 }
 
-const constructor = new Constructor(
-    [...bankSplitted],
-    "あのデパートは、毎日X１０時に開店する"
-);
+const constructor = new Constructor([...bank]);
 
 const appendElement = (parent, elm) => {
     if (parent.lastChild) {
@@ -124,7 +105,7 @@ const paintGuesses = () => {
         if (contextSplit[i] === "＿") {
             const word = constructor.guessWords[underscore];
             const element = document.createElement(
-                word == EMPTY ? "div" : "button"
+                word === EMPTY ? "div" : "button"
             );
             element.className = word === EMPTY ? "empty-word" : "word-btn";
             element.appendChild(document.createTextNode(word));
@@ -156,7 +137,7 @@ const setupPopPushEvents = (buttons) => {
         btn.onclick = (ev) => {
             // Persistence.setItem(constructor.guessWords);
             const word = ev.target.textContent;
-            if (ev.target.parentNode.className === "guesses") {
+            if (ev.target.parentNode == guessDiv) {
                 // Pop the element
                 constructor.remove(word);
                 appendElement(bankDiv, btn);
@@ -166,7 +147,6 @@ const setupPopPushEvents = (buttons) => {
                 appendElement(guessDiv, btn);
             }
             paintGuesses();
-            console.log(constructor.guessWords);
         };
     });
 };
@@ -176,22 +156,21 @@ const setupEvents = () => {
     setupPopPushEvents(btns);
 };
 
-const outputModel = (model) => {
+const outputModel = () => {
     paintGuesses();
     paintBank();
     setupEvents();
 };
 
-resetBtn.onclick = (ev) => {
+resetBtn.onclick = () => {
     constructor.reset();
+
     const guessBtns = guessDiv.querySelectorAll("button");
-    guessBtns.forEach((btn) => {
-        appendElement(bankDiv, btn);
-    });
+    guessBtns.forEach((btn) => appendElement(bankDiv, btn));
+
     constructor.shuffle();
-    analysisDiv.innerHTML = "";
     outputModel(constructor);
 };
 
 constructor.shuffle();
-outputModel(constructor);
+outputModel();
