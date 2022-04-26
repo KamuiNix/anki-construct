@@ -63,7 +63,11 @@ The second dropdown's correct answer is to leave it blank, hence the asterisk.
 
 This card type is intended to have a single blank only, but also supports multiple answers. In the back, correct answers for the missed ones are highlighted in purple.
 
-`context` - the blank should be indicated with a `＿`. A number that represents how many answer choices they should select should reside right before the underscore.
+`context` - the blank should be indicated with a `＿`.
+
+-   A number that represents how many answer choices they should select should reside right before the underscore.
+
+-   You can also specify whether or not to display the empty box with an "H" right before the choice length. For example, `H1＿` can be used for a single choice prompt where a blank would be unnecessary.
 
 `options` - space delimited list of answer choices
 
@@ -93,6 +97,7 @@ After a period of development, testing, refactoring, and documentation, `dev/` i
 The only dependency for the project is [Persistence](https://github.com/SimonLammer/anki-persistence), which is a small javascript library for passing data from the front to the back. Struct uses this to save the guesses inputted by the user, so the back portion of the card can grade and visually indicate the correct and missed answer choices.
 
 ### Constructor
+
 This is a class the note type is dependant upon because it serves as the model and controller for the view (HTML interface). For each card type, the constructor is modified as necessary.
 Supported operations include adding to bank, removal, queries, reset, and more.
 

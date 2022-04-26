@@ -11,7 +11,9 @@ const bank = "ある から いる くる する".split(" ");
 class Constructor {
     constructor(bank) {
         this.bank = bank;
-        this.maxLen = parseInt(context.match(/(\d)＿/)[1]);
+        const res = context.match(/(\w)?(\d)＿/);
+        this.shouldHide = res[1] === "H";
+        this.maxLen = parseInt(res[2]);
         // Uses empty string for blanks
         this.guessWords = Array(this.maxLen).fill(EMPTY);
     }
@@ -102,11 +104,16 @@ const paintGuesses = () => {
     guessDiv.innerHTML = "";
     let underscore = 0;
     const idx_num = context.match(/(\d)＿/).index;
+    const offset = constructor.shouldHide ? -1 : 0;
     const newContext =
-        context.slice(0, idx_num) + context.slice(idx_num + 1, context.length);
+        context.slice(0, idx_num + offset) +
+        context.slice(idx_num + 1, context.length);
     const contextSplit = newContext.split(/(?=＿)|(?<=＿)/g);
     for (let i = 0; i < contextSplit.length; i++) {
         if (contextSplit[i] === "＿") {
+            if (constructor.shouldHide) {
+                continue;
+            }
             const word = constructor.guessWords[underscore];
             const element = document.createElement(
                 word == EMPTY ? "div" : "button"
